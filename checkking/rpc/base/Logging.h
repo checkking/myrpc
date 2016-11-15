@@ -55,7 +55,7 @@ Impl _impl;
 #define LOG_TRACE if (Logger::logLevel() <= Logger::TRACE) \
         Logger(__FILE__, __LINE__, Logger::TRACE, __func__).stream()
 #define LOG_DEBUG if (Logger::logLevel() <= Logger::DEBUG) \
-        Logger(__FILE__, __LINE__, Logger::INFO, __func__).stream()
+        Logger(__FILE__, __LINE__, Logger::DEBUG, __func__).stream()
 #define LOG_INFO if (Logger::logLevel() <= Logger::INFO) \
         Logger(__FILE__, __LINE__, Logger::INFO, __func__).stream()
 #define LOG_WARN if (Logger::logLevel() <= Logger::WARN) \
