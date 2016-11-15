@@ -1,7 +1,10 @@
 WORKROOT = ../
 LIB_SRC =		\
 	LogStream.cpp \
-	Timestamp.cpp
+	Timestamp.cpp \
+	ThreadComm.cpp \
+	Logging.cpp \
+	LogFile.cpp
 
 include $(WORKROOT)/common.mk
 
