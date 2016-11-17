@@ -18,7 +18,7 @@ OBJS = $(patsubst %.cpp,%.o,$(RPC_NET_SRC))
 
 librpc_net.a: $(RPC_NET_SRC)
 	$(CC) $(CPPFLAGS) -c $^
-	ar rcs $@ $(OBJS)
+	ar rcs  $@ $(OBJS)
 	mkdir -p ./output/lib
 	cp -f --link librpc_net.a ./output/lib
 	mkdir -p ./output/include

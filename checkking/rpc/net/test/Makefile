@@ -9,10 +9,12 @@ INCLUDE_PATH = -I$(GTEST)/include/ \
 			   -I$(RPC_BASE)/output/include/ \
 			   -I$(NET_BASE)/output/include/ \
 			   -I./
+
 LIB_PATH = -L$(RPC_BASE)/output/lib -lrpc_base \
 		   -L$(GTEST)/lib -lgtest \
 		   -L$(GTEST)/lib -lgtest_main \
 		   -L$(NET_BASE)/output/lib -lrpc_net \
+		   -L$(RPC_BASE)/output/lib -lrpc_base \
 		   -lpthread \
 		   -lrt
 CPP = g++

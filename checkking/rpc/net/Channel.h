@@ -2,6 +2,8 @@
 #define CHECKKING_RPC_NET_CHANNEL_H
 
 #include <boost/noncopyable.hpp>
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 
 namespace checkking {
 namespace rpc {
@@ -9,7 +11,8 @@ class EventLoop;
 
 class Channel : boost::noncopyable {
 public:
-    typedef void (*EventCallback)();
+    // typedef void (*EventCallback)();
+    typedef boost::function<void()> EventCallback;
 
     Channel(EventLoop* loop, int fd);
 
