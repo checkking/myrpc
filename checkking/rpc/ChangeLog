@@ -1,3 +1,12 @@
+2016-11-17 Check King <checkking@foxmail.com>
+	* Basic acceptor works
+
+2016-11-16 Check King <checkking@foxmail.com>
+	* Basic reactor works
+
+2016-11-15 Check King <checkking@foxmail.com>
+	* Logging works
+
 2016-11-15 Check King <checkking@foxmail.com>
 	* LogStream works
 

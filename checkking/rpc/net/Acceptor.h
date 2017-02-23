@@ -16,11 +16,13 @@ class InetAddress;
 
 class Acceptor : boost::noncopyable {
 public:
-    typedef void (*NewConnectionCallback)(int sockfd, const InetAddress&);
+    // typedef void (*NewConnectionCallback)(int sockfd, const InetAddress&);
+    typedef boost::function<void (int sockfd,
+            const InetAddress&)> NewConnectionCallback;
     Acceptor(EventLoop* loop, const InetAddress& listenAddr);
 
     void setNewConnectionCallback(const NewConnectionCallback& cb) {
-        _newConnectionCallback;
+        _newConnectionCallback = cb;
     }
 
     bool listenning() const {

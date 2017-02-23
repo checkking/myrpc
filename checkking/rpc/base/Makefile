@@ -1,10 +1,6 @@
 WORKROOT = ../
-LIB_SRC =		\
-	LogStream.cpp \
-	Timestamp.cpp \
-	ThreadComm.cpp \
-	Logging.cpp \
-	LogFile.cpp
+
+LIB_SRC = $(wildcard *.cpp)
 
 include $(WORKROOT)/common.mk
 
