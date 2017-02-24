@@ -35,5 +35,14 @@ namespace rpc {
         ssize_t n = ::read(_channel->fd(), buf, sizeof buf);
         _messageCallback(shared_from_this(), buf, n);
     }
+
+    void TcpConnection::connectDestroyed() {
+        _loop->assertInLoopThread();
+        assert(state_ == CONNECTED || state_ == CONNECTED);
+        setState(CONNECTED);
+        channel_->disableAll();
+        _connectionCallback(shared_from_this());
+        loop_channel_->removeChannel(get_pointer(_channel));
+    }
 } // namespace rpc
 } // namespace checkking

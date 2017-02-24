@@ -21,6 +21,32 @@ EventLoop::EventLoop():_looping(false), _threadId(CurrentThread::tid()),
     }
 }
 
+void EventLoop::runInLoop(const Functor& cb) {
+    if (isInLoopThread()) {
+        cb();
+    } else {
+        queueInLoop(cb);
+    }
+}
+
+void EventLoop::queueInLoop(const Functor& cb) {
+    {
+        MutexLockGuard lock(_mutex); 
+        _pendingFunctors.push_back(cb);
+    }
+    if (!isInLoopThread() || _callingPendingFunctors) {
+        wakeup();
+    }
+}
+
+void EventLoop::wakeup() {
+    uint64_t one = 1;
+    ssize_t n = ::write(_wakeupFd, &one, sizeof one);
+    if (n != sizeof one) {
+        LOG_ERROR << "EventLoop::wakeup() writes " << n << " bytes instead of 8";
+    }
+}
+
 EventLoop::~EventLoop() {
     assert(!_looping);
     t_loopInThisThread = NULL;

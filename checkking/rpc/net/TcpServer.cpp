@@ -1,4 +1,6 @@
 #include <boost/bind.hpp>
+#include <boost/format.hpp>
+#include <string>
 #include "TcpServer.h"
 
 namespace checkking {
@@ -10,11 +12,46 @@ TcpServer::TcpServer(EventLoop* loop, const InetAddress& listenAddr)
          _started(false), 
          _nextConnId(1) {
     _acceptor->setNewConnectionCallback(boost::bind(&TcpServer::newConnection, this, _1, _2));
-    // _acceptor->setNewConnectionCallback(&TcpServer::newConnection);
 }
 
 TcpServer::~TcpServer() {
 
+}
+
+void TcpServer::start() {
+    if (!_started) {
+        _started = true;
+    }
+    if (!acceptor_->listenning()) {
+        _loop->runInLoop(
+                boost::bind(&Acceptor::listen, get_pointer(_acceptor)));
+    }
+}
+
+void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr) {
+    _loop->assertInLoopThread();
+    std::string connName = _name + boost::format("#%d" % _nextConnId).str();
+    ++_nextConnId;
+    LOG_INFO << "TcpServer::newConnection [" << _name
+            << "] - new connection [" << connName
+            << "] from " << peerAddr.toHostPort();
+    InetAddress localAddr(sockets::getLocalAddr(sockfd));
+    TcpConnectionPtr conn(
+            new TcpConnection(_loop, connName, sockfd, localAddr, peerAddr));
+    _connections[connName] = conn;
+    conn->setConnectionCallback(_connectionCallback);
+    conn->setMessageCallback(_messageCallback);
+    conn->setCloseCallback();
+}
+
+void TcpServer::removeConnection(const TcpConnectionPtr& conn) {
+    _loop->assertInLoopThread();
+    LOG_INFO << "TcpServer::removeConnection [" << name_
+           << "] - connection " << conn->name();
+    size_t n = _connections.erase(conn->name());
+    assert(n == 1); (void)n;
+    loop_->queueInLoop(
+        boost::bind(&TcpConnection::connectDestroyed, conn));
 }
 
 } // namespace rpc

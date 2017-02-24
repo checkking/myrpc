@@ -47,6 +47,7 @@ public:
     void setConnectionCallback(const ConnectionCallback& cb) {
         _connectionCallback = cb;
     }
+    void connectDestroyed();
 
 private:
     enum StateE {

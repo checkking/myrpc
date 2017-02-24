@@ -28,6 +28,8 @@ public:
         _messageCallback = cb;
     }
 
+    void removeConnection(const TcpConnectionPtr& conn);
+
 private:
     typedef std::map<std::string, TcpConnectionPtr> ConnectionMap;
     void newConnection(int sockfd, const InetAddress& peerAddr);
