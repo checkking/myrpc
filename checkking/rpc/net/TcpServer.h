@@ -39,6 +39,7 @@ private:
     boost::scoped_ptr<Acceptor> _acceptor;
     ConnectionCallback _connectionCallback;
     MessageCallback _messageCallback;
+    CloseCallback _closeCallback;
     bool _started;
     int _nextConnId;
     ConnectionMap _connections;

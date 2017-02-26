@@ -1,6 +1,7 @@
 #include "Poller.h"
-
 #include <poll.h>
+#include <boost/implicit_cast.hpp>
+#include <algorithm>
 
 #include "Timestamp.h"
 #include "Channel.h"
@@ -55,6 +56,31 @@ void Poller::updateChannel(Channel* channel) {
         struct pollfd& pfd = _pollfds[channel->index()];
         pfd.events = static_cast<short>(channel->events());
         pfd.revents = 0;
+    }
+}
+
+void Poller::removeChannel(Channel* channel) {
+    assertInLoopThread();
+    LOG_TRACE << "fd = " << channel->fd();
+    assert(_channels.find(channel->fd()) != _channels.end());
+    assert(_channels[channel->fd()] == channel);
+    assert(channel->isNoneEvent());
+    int idx = channel->index();
+    assert(0 <= idx && idx < static_cast<int>(_pollfds.size()));
+    const struct pollfd& pfd = _pollfds[idx]; (void)pfd;
+    assert(pfd.fd == -channel->fd()-1 && pfd.events == channel->events());
+    size_t n = _channels.erase(channel->fd());
+    assert(n == 1); (void)n;
+    if (boost::implicit_cast<size_t>(idx) == _pollfds.size()-1) {
+        _pollfds.pop_back();
+    } else {
+        int channelAtEnd = _pollfds.back().fd;
+        iter_swap(_pollfds.begin()+idx, _pollfds.end()-1);
+        if (channelAtEnd < 0) {
+            channelAtEnd = -channelAtEnd-1;
+        }
+        _channels[channelAtEnd]->setIndex(idx);
+        _pollfds.pop_back();
     }
 }
 } // namespace rpc

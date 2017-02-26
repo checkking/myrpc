@@ -3,6 +3,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/function.hpp>
 #include "Mutex.h"
 #include "ThreadComm.h"
 #include <vector>
@@ -43,6 +44,8 @@ public:
     void queueInLoop(const Functor& cb);
 
     void wakeup();
+
+    void removeChannel(Channel* channel);
 
     static EventLoop* getEventLoopOfCurrentThread();
 private:

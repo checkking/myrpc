@@ -16,6 +16,9 @@ namespace rpc {
             _localAddr(localAddr), 
             _peerAddr(peerAddr) {
         _channel->setReadCallback(boost::bind(&TcpConnection::handleRead, this));
+        _channel->setWriteCallback(boost::bind(&TcpConnection::handleWrite, this));
+        _channel->setCloseCallback(boost::bind(&TcpConnection::handleClose, this));
+        _channel->setErrorCallback(boost::bind(&TcpConnection::handleError, this));
     }
 
     TcpConnection::~TcpConnection() {
@@ -36,13 +39,25 @@ namespace rpc {
         _messageCallback(shared_from_this(), buf, n);
     }
 
+    void TcpConnection::handleWrite() {
+        
+    }
+
+    void TcpConnection::handleClose() {
+    
+    }
+    
+    void TcpConnection::handleError() {
+    
+    }
+
     void TcpConnection::connectDestroyed() {
         _loop->assertInLoopThread();
-        assert(state_ == CONNECTED || state_ == CONNECTED);
+        assert(_state == CONNECTED || _state == CONNECTED);
         setState(CONNECTED);
-        channel_->disableAll();
+        _channel->disableAll();
         _connectionCallback(shared_from_this());
-        loop_channel_->removeChannel(get_pointer(_channel));
+        _loop->removeChannel(get_pointer(_channel));
     }
 } // namespace rpc
 } // namespace checkking

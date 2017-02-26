@@ -79,5 +79,11 @@ void EventLoop::loop() {
 void EventLoop::updateChannel(Channel* channel) {
     _poller->updateChannel(channel);
 }
+
+void EventLoop::removeChannel(Channel* channel) {
+    assert(channel->ownerLoop() == this);
+    assertInLoopThread();
+    _poller->removeChannel(channel);
+}
 } // namespace rpc
 } // namespace checkking

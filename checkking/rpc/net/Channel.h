@@ -23,8 +23,12 @@ public:
     void setWriteCallback(const EventCallback& cb) {
         _writeCallback = cb;
     }
-    void setErroCallbakc(const EventCallback& cb) {
+    void setErrorCallback(const EventCallback& cb) {
         _errorCallback = cb;
+    }
+
+    void setCloseCallback(const EventCallback& cb) {
+        _closeCallback = cb;
     }
     int fd() const {
         return _fd;
@@ -35,10 +39,31 @@ public:
     void setRevents(int revent) {
         _revent = revent;
     }
+    bool isNoneEvent() const { 
+        return _events == kNoneEvent;
+    }
+    void enableWriting() {
+        _events |= kWriteEvent; 
+        update();
+    }
 
     void enableReading() {
         _events |= kReadEvent;
         update();
+    }
+
+    void disableWriting() {
+        _events &= ~kWriteEvent;
+        update();
+    }
+
+    void disableAll() {
+        _events = kNoneEvent;
+        update();
+    }
+
+    bool isWriting() const {
+        return _events & kWriteEvent;
     }
 
     int index() const {
@@ -67,6 +92,7 @@ private:
     EventCallback _readCallback;
     EventCallback _writeCallback;
     EventCallback _errorCallback;
+    EventCallback _closeCallback;
 }; // class Channel
 
 } // namespace rpc

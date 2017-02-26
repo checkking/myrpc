@@ -27,6 +27,8 @@ public:
         _ownerLoop->assertInLoopThread();
     }
 
+    void removeChannel(Channel* channel);
+
 private:
     typedef std::vector<struct pollfd> PollFdList;
     typedef std::map<int, Channel*> ChannelMap;
