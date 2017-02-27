@@ -49,6 +49,7 @@ void Poller::updateChannel(Channel* channel) {
         pfd.revents = 0;
         _pollfds.push_back(pfd);
         int idx = static_cast<int>(_pollfds.size()) - 1;
+        channel->setIndex(idx);
         _channels[pfd.fd] = channel;
     } else {
         assert(_channels.find(channel->fd()) != _channels.end());

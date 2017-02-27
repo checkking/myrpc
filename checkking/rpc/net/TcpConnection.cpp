@@ -29,7 +29,8 @@ namespace rpc {
 
     void TcpConnection::connectEstablished() {
         _loop->assertInLoopThread();
-        assert(_state == CONNECTED);
+        assert(_state == CONNECTING);
+        setState(CONNECTED);
         _channel->enableReading();
 
         _connectionCallback(shared_from_this());
