@@ -5,6 +5,7 @@
 #include<boost/implicit_cast.hpp> // implicit_cast
 #include <stdio.h> // snprintf
 #include <string.h> // bzero
+#include <errno.h> // errno
 #include <unistd.h>
 #include "Logging.h"
 
@@ -95,5 +96,14 @@ struct sockaddr_in sockets::getLocalAddr(int sockfd) {
     return localaddr;
 }
 
+int sockets::getSocketError(int sockfd) {
+    int optval;
+    socklen_t optlen = sizeof optval;
+    if (::getsockopt(sockfd, SOL_SOCKET,  SO_ERROR, &optval, &optlen) < 0) {
+        return errno;
+    } else {
+        return optval;
+    }
+}
 } // namespace rpc
 } // namespace checkking

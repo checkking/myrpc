@@ -1,7 +1,9 @@
-#include "Logging.h"
+#include <string.h>
 #include <boost/bind.hpp>
-#include "TcpConnection.h"
 #include "EventLoop.h"
+#include "Logging.h"
+#include "SocketsOps.h"
+#include "TcpConnection.h"
 
 namespace checkking {
 namespace rpc {
@@ -48,10 +50,10 @@ namespace rpc {
 
     void TcpConnection::handleWrite() {
         _loop->assertInLoopThread();
-        if (channel_->isWriting()) {
-            ssize_t n = ::write(channel_->fd(),
+        if (_channel->isWriting()) {
+            ssize_t n = ::write(_channel->fd(),
                     _outputBuf, strlen(_outputBuf));
-            if (n == 0 || n == strlen(_outputBuf)) {
+            if (n == 0 || n == static_cast<ssize_t>(strlen(_outputBuf))) {
                 _channel->disableWriting();
             } else if (n > 0) {
                 LOG_WARN << "Write not finished.";
@@ -64,11 +66,17 @@ namespace rpc {
     }
 
     void TcpConnection::handleClose() {
-    
+        _loop->assertInLoopThread();
+        LOG_TRACE << "TcpConnection::handleClose state = " << _state;
+        assert(_state == CONNECTED || _state == DISCONNECTING);
+        _channel->disableAll();
+        _closeCallback(shared_from_this());
     }
     
     void TcpConnection::handleError() {
-    
+        int err = sockets::getSocketError(_channel->fd());
+        LOG_ERROR << "TcpConnection::handleError [" << _name
+            << "] - SO_ERROR = " << err << " " << strerror_tl(err);
     }
 
     void TcpConnection::connectDestroyed() {
@@ -83,7 +91,7 @@ namespace rpc {
     void TcpConnection::send(const std::string& message) {
         _loop->assertInLoopThread();
         assert(_state == CONNECTED);
-        _outputBuf = message;
+        strcpy(_outputBuf, message.c_str());
         _channel->enableWriting();
     }
 } // namespace rpc
