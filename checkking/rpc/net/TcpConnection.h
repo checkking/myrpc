@@ -56,10 +56,14 @@ public:
     }
     void connectDestroyed();
 
+    void send(const std::string& message);
+
 private:
     enum StateE {
         CONNECTING,
         CONNECTED,
+        DISCONNECTING,
+        DISCONNECTED
     };
     void setState(StateE s) {
         _state = s;
@@ -79,6 +83,8 @@ private:
     ConnectionCallback _connectionCallback;
     MessageCallback _messageCallback;
     CloseCallback _closeCallback;
+    char _outputBuf[1024];
+    char _inputBuf[1024];
 }; // class TcpConnection
 
 } // namespace rpc

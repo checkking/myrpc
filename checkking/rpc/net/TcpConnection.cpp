@@ -36,11 +36,31 @@ namespace rpc {
     void TcpConnection::handleRead() {
         char buf[1024];
         ssize_t n = ::read(_channel->fd(), buf, sizeof buf);
-        _messageCallback(shared_from_this(), buf, n);
+        if (n > 0) {
+            _messageCallback(shared_from_this(), buf, n);
+        } else if (n == 0) {
+            handleClose();
+        } else {
+            LOG_ERROR << "Failed to handleRead";
+            handleError();
+        }
     }
 
     void TcpConnection::handleWrite() {
-        
+        _loop->assertInLoopThread();
+        if (channel_->isWriting()) {
+            ssize_t n = ::write(channel_->fd(),
+                    _outputBuf, strlen(_outputBuf));
+            if (n == 0 || n == strlen(_outputBuf)) {
+                _channel->disableWriting();
+            } else if (n > 0) {
+                LOG_WARN << "Write not finished.";
+                _channel->disableWriting();
+            } else {
+                LOG_TRACE << "An error has happened!";
+                _channel->disableWriting();
+            }
+        }
     }
 
     void TcpConnection::handleClose() {
@@ -53,11 +73,18 @@ namespace rpc {
 
     void TcpConnection::connectDestroyed() {
         _loop->assertInLoopThread();
-        assert(_state == CONNECTED || _state == CONNECTED);
-        setState(CONNECTED);
+        assert(_state == CONNECTED);
+        setState(DISCONNECTED);
         _channel->disableAll();
         _connectionCallback(shared_from_this());
         _loop->removeChannel(get_pointer(_channel));
+    }
+
+    void TcpConnection::send(const std::string& message) {
+        _loop->assertInLoopThread();
+        assert(_state == CONNECTED);
+        _outputBuf = message;
+        _channel->enableWriting();
     }
 } // namespace rpc
 } // namespace checkking
