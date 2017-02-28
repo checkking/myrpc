@@ -66,11 +66,13 @@ void EventLoop::loop() {
     assertInLoopThread();
     _looping = true;
     while (!_quit) {
+        _activeChannels.clear();
         _poller->poll(kPollTimeMs, &_activeChannels);
         for (ChannelList::iterator itr = _activeChannels.begin(); 
                 itr != _activeChannels.end(); ++itr) {
             (*itr)->handleEvent();
         }
+        doPendingFunctors();
     }
     LOG_TRACE << "EventLoop " << this << " stop looping";
     _looping = false;
@@ -84,6 +86,19 @@ void EventLoop::removeChannel(Channel* channel) {
     assert(channel->ownerLoop() == this);
     assertInLoopThread();
     _poller->removeChannel(channel);
+}
+
+void EventLoop::doPendingFunctors() {
+    std::vector<Functor> functors;
+    _callingPendingFunctors = true;
+    {
+        MutexLockGuard lock(_mutex);
+        functors.swap(_pendingFunctors);
+    }
+    for (size_t i = 0; i < functors.size(); ++i) {
+        functors[i]();
+    }
+    _callingPendingFunctors = false;
 }
 } // namespace rpc
 } // namespace checkking

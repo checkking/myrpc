@@ -50,6 +50,8 @@ public:
     static EventLoop* getEventLoopOfCurrentThread();
 private:
     void abortNotInLoopThread();
+    void doPendingFunctors();
+
     bool _looping;
     const pid_t _threadId;
     bool _quit;

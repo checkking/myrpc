@@ -1,4 +1,4 @@
-2017-02-27: 关闭客户端后，服务端出core,报错：20170227 15:34:55.344972Z 24517 ERROR handleRead Failed to handleRead - TcpConnection.cpp:47
+- 2017-02-27: 关闭客户端后，服务端出core,报错：20170227 15:34:55.344972Z 24517 ERROR handleRead Failed to handleRead - TcpConnection.cpp:47
 20170227 15:34:55.345009Z 24517 ERROR handleError TcpConnection::handleError [0.0.0.0:9981#1] - SO_ERROR = 0 Success - TcpConnection.cpp:79
 20170227 15:34:55.345018Z 24517 ERROR handleRead Failed to handleRead - TcpConnection.cpp:47
 20170227 15:34:55.345025Z 24517 ERROR handleError TcpConnection::handleError [0.0.0.0:9981#1] - SO_ERROR = 0 Success - TcpConnection.cpp:79
@@ -6,3 +6,4 @@
 20170227 15:34:56.271741Z 24517 INFO removeConnection TcpServer::removeConnection [0.0.0.0:9981] - connection 0.0.0.0:9981#1 - TcpServer.cpp:55
 TcpServer_test: TcpServer.cpp:58: void checkking::rpc::TcpServer::removeConnection(const TcpConnectionPtr&): Assertion `n == 1' failed.
 Aborted (core dumped)
+> 这个bug的原因是在EventLoop每次通过Poller调用poll之前没有调用_activityChannel.clear()，导致重复处理关闭了的连接

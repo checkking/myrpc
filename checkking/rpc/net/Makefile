@@ -27,4 +27,3 @@ librpc_net.a: $(RPC_NET_SRC)
 clean:
 	rm -f *.o *.a *.core
 	rm -rf ./output
-

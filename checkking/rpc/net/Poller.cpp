@@ -57,6 +57,9 @@ void Poller::updateChannel(Channel* channel) {
         struct pollfd& pfd = _pollfds[channel->index()];
         pfd.events = static_cast<short>(channel->events());
         pfd.revents = 0;
+        if (channel->isNoneEvent()) {
+            pfd.fd = -channel->fd() - 1;
+        }
     }
 }
 

@@ -44,6 +44,10 @@ namespace rpc {
         } else if (n == 0) {
             handleClose();
         } else {
+            /*
+            if (errno == EAGAIN) {
+            }
+            */
             LOG_ERROR << "Failed to handleRead";
             handleError();
         }
@@ -87,6 +91,8 @@ namespace rpc {
         _channel->disableAll();
         _connectionCallback(shared_from_this());
         _loop->removeChannel(get_pointer(_channel));
+        LOG_INFO << "TcpConnection::connectDestroyed ["
+                << _name << "]";
     }
 
     void TcpConnection::send(const std::string& message) {
