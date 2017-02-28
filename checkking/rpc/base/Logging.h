@@ -65,6 +65,8 @@ Impl _impl;
 #define LOG_FATAL if (Logger::logLevel() <= Logger::FATAL) \
         Logger(__FILE__, __LINE__, Logger::FATAL, __func__).stream()
 
+const char* strerror_tl(int savedErrno);
+
 } // namespace rpc
 } // namespace checkking
 #endif // CHECKKING_RPC_BASE_LOGGING_H

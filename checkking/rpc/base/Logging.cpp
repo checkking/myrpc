@@ -1,12 +1,18 @@
 #include "Logging.h"
 #include <pthread.h>
 #include <stdio.h>
+#include <errno.h>
 #include "ThreadComm.h"
 
 namespace checkking {
 namespace rpc {
 __thread char t_time[32];
 __thread time_t t_lastSecond;
+__thread char t_errnobuf[512];
+
+const char* strerror_tl(int savedErrno) {
+    return strerror_r(savedErrno, t_errnobuf, sizeof t_errnobuf);
+}
 
 Logger::LogLevel initLogLevel() {
     if (::getenv("RPC_LOG_TRACE")) {
