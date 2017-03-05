@@ -4,6 +4,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include "Timestamp.h"
 
 namespace checkking {
 namespace rpc {
@@ -12,12 +13,13 @@ class EventLoop;
 class Channel : boost::noncopyable {
 public:
     // typedef void (*EventCallback)();
+    typedef boost::function<void(Timestamp)> ReadEventCallback;
     typedef boost::function<void()> EventCallback;
 
     Channel(EventLoop* loop, int fd);
 
-    void handleEvent();
-    void setReadCallback(const EventCallback& cb) {
+    void handleEvent(Timestamp receiveTime);
+    void setReadCallback(const ReadEventCallback& cb) {
         _readCallback = cb;
     }
     void setWriteCallback(const EventCallback& cb) {
@@ -89,7 +91,7 @@ private:
     int _revent;
     int _index;
 
-    EventCallback _readCallback;
+    ReadEventCallback _readCallback;
     EventCallback _writeCallback;
     EventCallback _errorCallback;
     EventCallback _closeCallback;

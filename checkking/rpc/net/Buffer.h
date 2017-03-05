@@ -29,11 +29,11 @@ public:
     }
 
     size_t prependableBytes() const {
-        return _readerIndex;
+        return _readerIdx;
     }
 
     const char* peek() const {
-        return begin() + _readerIndex;
+        return begin() + _readerIdx;
     }
 
     void retrieve(size_t len) {
@@ -49,7 +49,7 @@ public:
 
     std::string retrieveAsString() {
         std::string str(peek(), readableBytes());
-        retrieveAll();
+        retrieveAll(peek() + readableBytes());
         return str;
     }
 
@@ -75,22 +75,22 @@ public:
     }
 
     char* beginWrite() {
-        return begin() + _writerIndex;
+        return begin() + _writerIdx;
     }
 
     const char* beginWrite() const {
-        return begin() + _writerIndex;
+        return begin() + _writerIdx;
     }
 
     void hasWritten(size_t len) {
-        _writerIndex += len;
+        _writerIdx += len;
     }
 
     void prepend(const void* /*restrict*/ data, size_t len) {
         assert(len <= prependableBytes());
-        _readerIndex -= len;
+        _readerIdx -= len;
         const char* d = static_cast<const char*>(data);
-        std::copy(d, d + len, begin() + _readerIndex);
+        std::copy(d, d + len, begin() + _readerIdx);
     }
 
     void shrink(size_t reserve) {
@@ -113,13 +113,13 @@ private:
 
     void makeSpace(size_t len) {
         if (writableBytes() + prependableBytes() < len + kCheapPrepend) {
-            _buffer.resize(_writerIndex + len);
+            _buffer.resize(_writerIdx + len);
         } else {
             // move readable data to the front, make space inside buffer
-            assert(kCheapPrepend < _readerIndex);
+            assert(kCheapPrepend < _readerIdx);
             size_t readable = readableBytes();
-            std::copy(begin() + _readerIndex,
-                    begin() + _writerIndex,
+            std::copy(begin() + _readerIdx,
+                    begin() + _writerIdx,
                     begin() + kCheapPrepend);
             assert(readable == readableBytes());
         }

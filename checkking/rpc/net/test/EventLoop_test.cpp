@@ -3,13 +3,14 @@
 #include <gtest/gtest.h>
 #include "Logging.h"
 #include "Channel.h"
+#include "Timestamp.h"
 
 namespace checkking {
 namespace rpc {
 
 EventLoop g_loop;
 
-void timeout() {
+void timeout(Timestamp t) {
     LOG_INFO << "Time out!";
     g_loop.quit();
 }

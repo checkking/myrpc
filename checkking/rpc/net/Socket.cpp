@@ -26,5 +26,9 @@ void Socket::setReuseAddr(bool on) {
     int optval = on ? 1 : 0;
     ::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
 }
+
+void Socket::shutdownWrite() {
+    sockets::shutdownWrite(_fd);
+}
 } // namespace rpc
 } // namespace checkking

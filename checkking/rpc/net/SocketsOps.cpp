@@ -72,6 +72,12 @@ void sockets::close(int sockfd) {
     }
 }
 
+void sockets::shutdownWrite(int sockfd) {
+    if (::shutdown(sockfd, SHUT_WR) < 0) {
+        LOG_FATAL << "shutdownWrite failed!";
+    }
+}
+
 void sockets::toHostPort(char* buf, const size_t size, const struct sockaddr_in& addr) {
     char host[INET_ADDRSTRLEN] = "INVALID";
     ::inet_ntop(AF_INET, &addr.sin_addr, host, sizeof host);

@@ -9,6 +9,7 @@
 #include "Callbacks.h"
 #include "Socket.h"
 #include "Channel.h"
+#include "Buffer.h"
 
 namespace checkking {
 namespace rpc {
@@ -58,6 +59,8 @@ public:
 
     void send(const std::string& message);
 
+    void shutdown();
+
 private:
     enum StateE {
         CONNECTING,
@@ -68,10 +71,12 @@ private:
     void setState(StateE s) {
         _state = s;
     }
-    void handleRead();
+    void handleRead(Timestamp);
     void handleWrite();
     void handleClose();
     void handleError();
+    void sendInLoop(const std::string& message);
+    void shutdownInLoop();
 
     EventLoop* _loop;
     std::string _name;
@@ -83,8 +88,8 @@ private:
     ConnectionCallback _connectionCallback;
     MessageCallback _messageCallback;
     CloseCallback _closeCallback;
-    char _outputBuf[1024];
-    char _inputBuf[1024];
+    Buffer _inputBuffer;
+    Buffer _outputBuffer;
 }; // class TcpConnection
 
 } // namespace rpc

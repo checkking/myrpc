@@ -1,5 +1,8 @@
 #include <string.h>
 #include <boost/bind.hpp>
+#include <boost/implicit_cast.hpp>
+#include <errno.h>
+
 #include "EventLoop.h"
 #include "Logging.h"
 #include "SocketsOps.h"
@@ -17,7 +20,7 @@ namespace rpc {
             _channel(new Channel(loop, sockfd)),
             _localAddr(localAddr), 
             _peerAddr(peerAddr) {
-        _channel->setReadCallback(boost::bind(&TcpConnection::handleRead, this));
+        _channel->setReadCallback(boost::bind(&TcpConnection::handleRead, this, _1));
         _channel->setWriteCallback(boost::bind(&TcpConnection::handleWrite, this));
         _channel->setCloseCallback(boost::bind(&TcpConnection::handleClose, this));
         _channel->setErrorCallback(boost::bind(&TcpConnection::handleError, this));
@@ -36,11 +39,11 @@ namespace rpc {
         _connectionCallback(shared_from_this());
     }
 
-    void TcpConnection::handleRead() {
-        char buf[1024];
-        ssize_t n = ::read(_channel->fd(), buf, sizeof buf);
+    void TcpConnection::handleRead(Timestamp receiveTime) {
+        int savedErrno = 0;
+        ssize_t n = _inputBuffer.readFd(_channel->fd(), &savedErrno);
         if (n > 0) {
-            _messageCallback(shared_from_this(), buf, n);
+            _messageCallback(shared_from_this(), &_inputBuffer, receiveTime);
         } else if (n == 0) {
             handleClose();
         } else {
@@ -57,16 +60,23 @@ namespace rpc {
         _loop->assertInLoopThread();
         if (_channel->isWriting()) {
             ssize_t n = ::write(_channel->fd(),
-                    _outputBuf, strlen(_outputBuf));
-            if (n == 0 || n == static_cast<ssize_t>(strlen(_outputBuf))) {
-                _channel->disableWriting();
-            } else if (n > 0) {
-                LOG_WARN << "Write not finished.";
-                _channel->disableWriting();
+                    _outputBuffer.peek(), _outputBuffer.readableBytes());
+            if (n > 0) {
+                _outputBuffer.retrieve(n);
+                if (_outputBuffer.readableBytes() == 0) {
+                    _channel->disableWriting();
+                   if (_state == DISCONNECTING) {
+                       shutdownInLoop();
+                   }
+                } else {
+                    LOG_TRACE << "I am going to write more data";
+                }
             } else {
-                LOG_TRACE << "An error has happened!";
+                LOG_ERROR << "An error has happened!";
                 _channel->disableWriting();
             }
+        } else {
+            LOG_TRACE << "Connection is down, no more writing.";
         }
     }
 
@@ -96,10 +106,55 @@ namespace rpc {
     }
 
     void TcpConnection::send(const std::string& message) {
+        if (_state == CONNECTED) {
+            if (_loop->isInLoopThread()) {
+                sendInLoop(message);
+            } else {
+                /// we donnot use share_from_this() (using **this**)
+                /// because we are sure the life time of TcpConnection
+                /// is longer than boost::bind function.
+                _loop->runInLoop(boost::bind(&TcpConnection::sendInLoop, this, message));
+            }
+        }
+    }
+
+    void TcpConnection::sendInLoop(const std::string& message) {
         _loop->assertInLoopThread();
-        assert(_state == CONNECTED);
-        strcpy(_outputBuf, message.c_str());
-        _channel->enableWriting();
+        ssize_t nwrote = 0;
+        if (!_channel->isWriting() && _outputBuffer.readableBytes() == 0) {
+            nwrote = ::write(_channel->fd(), message.data(), message.size());
+            if (nwrote >= 0) {
+                if (boost::implicit_cast<size_t>(nwrote) < message.size()) {
+                    LOG_TRACE << "I am going to write more data.";
+                }
+            } else {
+                nwrote = 0;
+                if (errno == EWOULDBLOCK) {
+                    LOG_ERROR << "TcpConnection::sendInLoop failed!";
+                }
+            }
+        }
+        assert(nwrote >= 0);
+        if (boost::implicit_cast<size_t>(nwrote) < message.size()) {
+            _outputBuffer.append(message.data() + nwrote, message.size() - nwrote);
+        }
+        if (_channel->isWriting()) {
+            _channel->enableWriting();
+        }
+    }
+
+    void TcpConnection::shutdown() {
+        if (_state == CONNECTED) {
+            setState(DISCONNECTING);
+            _loop->runInLoop(boost::bind(&TcpConnection::shutdownInLoop, this));
+        }
+        if (_channel->isWriting()) {
+            _socket->shutdownWrite();
+        }
+    }
+
+    void TcpConnection::shutdownInLoop() {
+        _loop->assertInLoopThread();
     }
 } // namespace rpc
 } // namespace checkking

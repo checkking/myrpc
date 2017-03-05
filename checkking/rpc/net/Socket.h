@@ -23,8 +23,10 @@ public:
 
     void setReuseAddr(bool on);
 
+    void shutdownWrite();
+
 private:
-int _fd;
+    int _fd;
 }; // class Socket
 
 } // namespace rpc

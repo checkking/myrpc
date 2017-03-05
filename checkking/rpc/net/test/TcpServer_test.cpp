@@ -3,11 +3,12 @@
 #include "Logging.h"
 #include "TcpConnection.h"
 #include "InetAddress.h"
+#include "Timestamp.h"
 
 namespace checkking {
 namespace rpc {
 
-void onConnection(const checkking::rpc::TcpConnectionPtr& conn) {
+void onConnection(const TcpConnectionPtr& conn) {
     if (conn->connected()) {
         LOG_INFO << "New connection: accepted a new connection"
                 << conn->name().c_str() << " from "
@@ -18,10 +19,11 @@ void onConnection(const checkking::rpc::TcpConnectionPtr& conn) {
     }
 }
 
-void onMessage(const checkking::rpc::TcpConnectionPtr& conn, const char* data, size_t len) {
-    LOG_INFO << "onMessage(): reviced" << len << " bytes from connection " << conn->name().c_str();
-    std::string msg = std::string(data, len);
-    conn->send(msg);
+void onMessage(const TcpConnectionPtr& conn, Buffer* buf, Timestamp receiveTime) {
+    LOG_INFO << "onMessage(): reviced" << buf->readableBytes() << " bytes from connection "
+            << conn->name().c_str()
+            << ", receiveTime:" << receiveTime.toFormattedString().c_str();
+    conn->send(buf->retrieveAsString());
 }
 }
 }

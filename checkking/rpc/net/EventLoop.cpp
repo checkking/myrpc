@@ -67,10 +67,10 @@ void EventLoop::loop() {
     _looping = true;
     while (!_quit) {
         _activeChannels.clear();
-        _poller->poll(kPollTimeMs, &_activeChannels);
+        Timestamp receiveTime = _poller->poll(kPollTimeMs, &_activeChannels);
         for (ChannelList::iterator itr = _activeChannels.begin(); 
                 itr != _activeChannels.end(); ++itr) {
-            (*itr)->handleEvent();
+            (*itr)->handleEvent(receiveTime);
         }
         doPendingFunctors();
     }
