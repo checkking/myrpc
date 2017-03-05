@@ -61,6 +61,8 @@ public:
 
     void shutdown();
 
+    void setTcpNoDelay(bool on);
+
 private:
     enum StateE {
         CONNECTING,

@@ -156,5 +156,9 @@ namespace rpc {
     void TcpConnection::shutdownInLoop() {
         _loop->assertInLoopThread();
     }
+
+    void TcpConnection::setTcpNoDelay(bool on) {
+        _socket->setTcpNoDelay(on);
+    }
 } // namespace rpc
 } // namespace checkking

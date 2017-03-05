@@ -13,6 +13,7 @@ void onConnection(const TcpConnectionPtr& conn) {
         LOG_INFO << "New connection: accepted a new connection"
                 << conn->name().c_str() << " from "
                 << conn->peerAddress().toHostPort().c_str();
+        conn->setTcpNoDelay(true);
     } else {
         LOG_INFO << "onConnection(): connection: connection "
                 << conn->name().c_str() << " is down.";

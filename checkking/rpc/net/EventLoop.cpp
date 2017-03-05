@@ -2,6 +2,7 @@
 
 #include <poll.h>
 #include <assert.h>
+#include <signal.h>
 #include "Logging.h"
 #include "Poller.h"
 #include "Channel.h"
@@ -11,6 +12,15 @@ namespace rpc {
 
 __thread EventLoop* t_loopInThisThread = NULL;
 const int kPollTimeMs = 10000;
+
+class IgnoreSigPipe {
+public:
+    IgnoreSigPipe() {
+        ::signal(SIGPIPE, SIG_IGN);
+    }
+};
+
+IgnoreSigPipe initObj;
 
 EventLoop::EventLoop():_looping(false), _threadId(CurrentThread::tid()),
         _quit(false), _poller(new Poller(this)) {

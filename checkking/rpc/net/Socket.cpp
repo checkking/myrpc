@@ -1,6 +1,8 @@
 #include "Socket.h"
 #include "SocketsOps.h"
 #include <string.h>
+#include <netinet/tcp.h>
+#include <netinet/in.h>
 
 namespace checkking {
 namespace rpc {
@@ -25,6 +27,11 @@ int Socket::accept(InetAddress* peeraddr) {
 void Socket::setReuseAddr(bool on) {
     int optval = on ? 1 : 0;
     ::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
+}
+
+void Socket::setTcpNoDelay(bool on) {
+    int optval = on ? 1 : 0;
+    ::setsockopt(_fd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof optval);
 }
 
 void Socket::shutdownWrite() {

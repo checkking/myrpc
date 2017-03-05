@@ -25,6 +25,8 @@ public:
 
     void shutdownWrite();
 
+    void setTcpNoDelay(bool on);
+
 private:
     int _fd;
 }; // class Socket
