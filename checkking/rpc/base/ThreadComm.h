@@ -30,6 +30,9 @@ class Thread: boost::noncopyable {
         std::string name() const {	
 		    return _name;
 		}
+        bool started() const {
+            return _started;
+        }
 
     private:
         bool _started;

@@ -6,6 +6,7 @@
 #include <map>
 #include "Callbacks.h"
 #include "Acceptor.h"
+#include "EventLoopThreadPool.h"
 
 namespace checkking {
 namespace rpc {
@@ -30,6 +31,13 @@ public:
 
     void removeConnection(const TcpConnectionPtr& conn);
 
+    void removeConnectionInLoop(const TcpConnectionPtr& conn);
+
+    void setThreadNum(int num) {
+        assert(!_started);
+        _threadPool->setThreadNum(num);
+    }
+
 private:
     typedef std::map<std::string, TcpConnectionPtr> ConnectionMap;
     void newConnection(int sockfd, const InetAddress& peerAddr);
@@ -37,11 +45,12 @@ private:
     EventLoop* _loop;
     const std::string _name;
     boost::scoped_ptr<Acceptor> _acceptor;
+    boost::scoped_ptr<EventLoopThreadPool> _threadPool;
+    bool _started;
+    int _nextConnId;
     ConnectionCallback _connectionCallback;
     MessageCallback _messageCallback;
     CloseCallback _closeCallback;
-    bool _started;
-    int _nextConnId;
     ConnectionMap _connections;
 }; // class TcpServer
 } // namespace rpc

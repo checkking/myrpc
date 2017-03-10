@@ -37,6 +37,7 @@ int main(int argc, char **argv)
     TcpServer server(&loop, listenAddr);
     server.setConnectionCallback(onConnection);
     server.setMessageCallback(onMessage);
+    server.setThreadNum(4);
     server.start();
     loop.loop();
 
