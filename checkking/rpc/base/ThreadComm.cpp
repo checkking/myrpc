@@ -104,7 +104,7 @@ void Thread::start() {
 
 void Thread::join() {
     assert(_started);
-    assert(_joined);
+    assert(!_joined);
     _joined = true;
     pthread_join(_pthreadId, NULL);
 }
