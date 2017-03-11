@@ -51,7 +51,9 @@ void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr) {
     conn->setMessageCallback(_messageCallback);
     conn->setCloseCallback(
             boost::bind(&TcpServer::removeConnection, this, _1));
-    conn->connectEstablished();
+    // big bug
+    // conn->connectEstablished();
+    ioLoop->runInLoop(boost::bind(&TcpConnection::connectEstablished, conn));
 }
 
 void TcpServer::removeConnection(const TcpConnectionPtr& conn) {
