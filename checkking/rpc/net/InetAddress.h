@@ -22,14 +22,11 @@ public:
     std::string toIpPort() const;
     uint16_t toPort() const;
 
-    const struct sockaddr_in& getSockaddrIn() const {
-        return _addr;
-    }
     const struct sockaddr* getSockAddr() const { 
         return sockets::sockaddr_cast(&_addr6);
     }
-    void setSockAddrIn(const struct sockaddr_in& addr) {
-        _addr = addr;
+    void setSockAddrIn6(const struct sockaddr_in6& addr) {
+        _addr6 = addr;
     }
     sa_family_t family() const {
         return _addr.sin_family;

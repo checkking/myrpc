@@ -21,6 +21,7 @@ public:
     ~Connector();
 
     void setNewConnectionCallback(const NewConnectionCallback& cb) {
+        _newConnectionCallback = cb;
     }
 
     void start();  // can be called in any thread
@@ -58,6 +59,7 @@ private:
     int _retryDelayMs;
 }; // class Connector
 
+typedef boost::shared_ptr<Connector> ConnectorPtr; 
 } // namespace rpc
 } // namespace checkking
 #endif  // CHECKKING_RPC_NET_CONNECTOR_H

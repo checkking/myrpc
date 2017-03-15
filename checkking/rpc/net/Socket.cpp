@@ -7,7 +7,7 @@
 namespace checkking {
 namespace rpc {
 void Socket::bindAddress(const InetAddress& localaddr) {
-    sockets::bindOrDie(_fd, localaddr.getSockaddrIn());
+    sockets::bindOrDie(_fd, localaddr.getSockAddr());
 }
 
 void Socket::listen() {
@@ -15,11 +15,11 @@ void Socket::listen() {
 }
 
 int Socket::accept(InetAddress* peeraddr) {
-    struct sockaddr_in addr;
+    struct sockaddr_in6 addr;
     bzero(&addr, sizeof addr);
     int connfd = sockets::accept(_fd, &addr);
     if (connfd >= 0) {
-        peeraddr->setSockAddrIn(addr);
+        peeraddr->setSockAddrIn6(addr);
     }
     return connfd;
 }

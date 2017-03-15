@@ -39,9 +39,9 @@ void fromIpPort(const char* ip, uint16_t port,
                         struct sockaddr_in6* addr);
 
 int createNonblockingOrDie(sa_family_t family);
-void bindOrDie(int sockfd, const struct sockaddr_in& addr);
+void bindOrDie(int sockfd, const struct sockaddr* addr);
 void listenOrDie(int sockfd);
-int accept(int sockfd, struct sockaddr_in* addr);
+int accept(int sockfd, struct sockaddr_in6* addr);
 void close(int sockfd);
 void shutdownWrite(int sockfd);
 

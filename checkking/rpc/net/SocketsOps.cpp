@@ -14,10 +14,10 @@ namespace checkking {
 namespace rpc {
 
 typedef struct sockaddr SA;
-const SA* sockaddr_cast(const struct sockaddr_in* addr) {
+const SA* sockets::sockaddr_cast(const struct sockaddr_in* addr) {
     return static_cast<const SA*>(boost::implicit_cast<const void*>(addr));
 }
-SA* sockaddr_cast(struct sockaddr_in* addr) {
+SA* sockets::sockaddr_cast(struct sockaddr_in* addr) {
     return static_cast<SA*>(boost::implicit_cast<void*>(addr));
 }
 const struct sockaddr* sockets::sockaddr_cast(const struct sockaddr_in6* addr) {
@@ -53,8 +53,8 @@ int sockets::createNonblockingOrDie(sa_family_t family) {
     return sockfd;
 }
 
-void sockets::bindOrDie(int sockfd, const struct sockaddr_in& addr) {
-    int ret = ::bind(sockfd, sockaddr_cast(&addr), sizeof addr);
+void sockets::bindOrDie(int sockfd, const struct sockaddr* addr) {
+    int ret = ::bind(sockfd, addr, static_cast<socklen_t>(sizeof(struct sockaddr_in6)));
     if (ret < 0) {
         LOG_FATAL << "bind socket failed!";
     }
@@ -67,13 +67,13 @@ void sockets::listenOrDie(int sockfd) {
     }
 }
 
-int sockets::accept(int sockfd, struct sockaddr_in* addr) {
+int sockets::accept(int sockfd, struct sockaddr_in6* addr) {
     socklen_t addrlen = sizeof *addr;
 #if VALGRID
-    int connfd = ::accept(sockfd, sockaddr_cast(addr), &addrlen);
+    int connfd = ::accept(sockfd, sockets::sockaddr_cast(addr), &addrlen);
     setNonBlockAndCloseOnExec(connfd);
 #else
-    int connfd = ::accept4(sockfd, sockaddr_cast(addr),
+    int connfd = ::accept4(sockfd, sockets::sockaddr_cast(addr),
             &addrlen, SOCK_NONBLOCK | SOCK_CLOEXEC);
 #endif
     if (connfd < 0) {
@@ -111,7 +111,7 @@ struct sockaddr_in6 sockets::getLocalAddr(int sockfd) {
     struct sockaddr_in6 localaddr;
     bzero(&localaddr, sizeof localaddr);
     socklen_t addrlen = sizeof(localaddr);
-    if (::getsockname(sockfd, sockaddr_cast(&localaddr), &addrlen) < 0) {
+    if (::getsockname(sockfd, sockets::sockaddr_cast(&localaddr), &addrlen) < 0) {
         LOG_ERROR << "getLocalAddr failed!";
     }
     return localaddr;
@@ -121,7 +121,7 @@ struct sockaddr_in6 sockets::getPeerAddr(int sockfd) {
     struct sockaddr_in6 peeraddr;
     bzero(&peeraddr, sizeof peeraddr);
     socklen_t addrlen = static_cast<socklen_t>(sizeof peeraddr);
-    if (::getpeername(sockfd, sockaddr_cast(&peeraddr), &addrlen) < 0) {
+    if (::getpeername(sockfd, sockets::sockaddr_cast(&peeraddr), &addrlen) < 0) {
         LOG_ERROR << "sockets::getPeerAddr";
     }
     return peeraddr;
@@ -132,7 +132,7 @@ void sockets::toIpPort(char* buf, size_t size,
 {
   toIp(buf,size, addr);
   size_t end = ::strlen(buf);
-  const struct sockaddr_in* addr4 = sockaddr_in_cast(addr);
+  const struct sockaddr_in* addr4 = sockets::sockaddr_in_cast(addr);
   uint16_t port = sockets::networkToHost16(addr4->sin_port);
   assert(size > end);
   snprintf(buf+end, size-end, ":%u", port);
@@ -144,13 +144,13 @@ void sockets::toIp(char* buf, size_t size,
   if (addr->sa_family == AF_INET)
   {
     assert(size >= INET_ADDRSTRLEN);
-    const struct sockaddr_in* addr4 = sockaddr_in_cast(addr);
+    const struct sockaddr_in* addr4 = sockets::sockaddr_in_cast(addr);
     ::inet_ntop(AF_INET, &addr4->sin_addr, buf, static_cast<socklen_t>(size));
   }
   else if (addr->sa_family == AF_INET6)
   {
     assert(size >= INET6_ADDRSTRLEN);
-    const struct sockaddr_in6* addr6 = sockaddr_in6_cast(addr);
+    const struct sockaddr_in6* addr6 = sockets::sockaddr_in6_cast(addr);
     ::inet_ntop(AF_INET6, &addr6->sin6_addr, buf, static_cast<socklen_t>(size));
   }
 }
