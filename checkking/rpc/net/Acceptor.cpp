@@ -10,7 +10,7 @@ namespace checkking {
 namespace rpc {
 Acceptor::Acceptor(EventLoop* loop, const InetAddress& listenAddr)
         : _loop(loop), 
-        _acceptSocket(sockets::createNonblockingOrDie()), 
+        _acceptSocket(sockets::createNonblockingOrDie(listenAddr.family())), 
         _acceptChannel(loop, _acceptSocket.fd()), 
         _newConnectionCallback(NULL),
         _listenning(false) {

@@ -31,6 +31,11 @@ void Channel::handleEvent(Timestamp receiveTime) {
     }
 }
 
+void Channel::remove() {
+    assert(isNoneEvent());
+    _loop->removeChannel(this);
+}
+
 const int Channel::kNoneEvent = 0;
 const int Channel::kReadEvent = POLLIN | POLLPRI;
 const int Channel::kWriteEvent = POLLOUT;

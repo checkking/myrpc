@@ -27,7 +27,18 @@ inline uint16_t networkToHost16(uint64_t net16) {
     return ntohs(net16);
 }
 
-int createNonblockingOrDie();
+void toIpPort(char* buf, size_t size,
+                      const struct sockaddr* addr);
+
+void toIp(char* buf, size_t size,
+                  const struct sockaddr* addr);
+
+void fromIpPort(const char* ip, uint16_t port,
+                        struct sockaddr_in* addr);
+void fromIpPort(const char* ip, uint16_t port,
+                        struct sockaddr_in6* addr);
+
+int createNonblockingOrDie(sa_family_t family);
 void bindOrDie(int sockfd, const struct sockaddr_in& addr);
 void listenOrDie(int sockfd);
 int accept(int sockfd, struct sockaddr_in* addr);
@@ -36,9 +47,18 @@ void shutdownWrite(int sockfd);
 
 void toHostPort(char* buf, const size_t size, const struct sockaddr_in& addr);
 void fromHostPort(const char* ip, uint16_t port, struct sockaddr_in* addr);
-struct sockaddr_in getLocalAddr(int sockfd);
+struct sockaddr_in6 getLocalAddr(int sockfd);
+struct sockaddr_in6 getPeerAddr(int sockfd);
+int  connect(int sockfd, const struct sockaddr* addr);
+const struct sockaddr* sockaddr_cast(const struct sockaddr_in* addr);
+const struct sockaddr* sockaddr_cast(const struct sockaddr_in6* addr);
+struct sockaddr* sockaddr_cast(struct sockaddr_in* addr);
+struct sockaddr* sockaddr_cast(struct sockaddr_in6* addr);
+const struct sockaddr_in* sockaddr_in_cast(const struct sockaddr* addr);
+const struct sockaddr_in6* sockaddr_in6_cast(const struct sockaddr* addr);
 
 int getSocketError(int sockfd);
+bool isSelfConnect(int sockfd);
 } // namespace sockets
 } // namespace rpc
 } // namespace checkking

@@ -77,6 +77,7 @@ public:
     EventLoop* ownerLoop() const {
         return _loop;
     }
+    void remove();
 
 private:
     void update();

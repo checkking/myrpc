@@ -3,16 +3,19 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <vector>
 #include <boost/function.hpp>
 #include "Mutex.h"
 #include "ThreadComm.h"
-#include <vector>
+#include "TimerId.h"
+#include "Callbacks.h"
 
 namespace checkking {
 namespace rpc {
 
 class Channel;
 class Poller;
+class TimerQueue;
 
 class EventLoop : boost::noncopyable {
 public:
@@ -41,6 +44,14 @@ public:
 
     void runInLoop(const Functor& cb);
 
+    TimerId runAt(const Timestamp& time, const TimerCallback& cb);
+
+    TimerId runAfter(double delay, const TimerCallback& cb);
+
+    TimerId runEvery(double interval, const TimerCallback& cb);
+
+    void cancel(TimerId timerId);
+
     void queueInLoop(const Functor& cb);
 
     void wakeup();
@@ -61,6 +72,7 @@ private:
     std::vector<Functor> _pendingFunctors;
     bool _callingPendingFunctors;
     int _wakeupFd;
+    boost::scoped_ptr<TimerQueue> _timerQueue;
 }; // EventLoop
 
 } // namespace rpc

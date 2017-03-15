@@ -3,9 +3,11 @@
 #include <poll.h>
 #include <assert.h>
 #include <signal.h>
+#include <sys/eventfd.h>
 #include "Logging.h"
 #include "Poller.h"
 #include "Channel.h"
+#include "TimerQueue.h"
 
 namespace checkking {
 namespace rpc {
@@ -22,8 +24,26 @@ public:
 
 IgnoreSigPipe initObj;
 
-EventLoop::EventLoop():_looping(false), _threadId(CurrentThread::tid()),
-        _quit(false), _poller(new Poller(this)) {
+int createEventfd()
+{
+    int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    if (evtfd < 0) {
+        LOG_ERROR << "Failed in eventfd";
+        abort();
+    }
+    return evtfd;
+}
+
+EventLoop::EventLoop()
+    :_looping(false),
+    _threadId(CurrentThread::tid()),
+    _quit(false),
+    _poller(new Poller(this)),
+    _activeChannels(),
+    _mutex(),
+    _pendingFunctors(),
+    _wakeupFd(createEventfd()),
+    _timerQueue(new TimerQueue(this)) {
     if (t_loopInThisThread) {
         LOG_FATAL << "Another EventLoop already in this thread " << _threadId;
     } else {
@@ -109,6 +129,22 @@ void EventLoop::doPendingFunctors() {
         functors[i]();
     }
     _callingPendingFunctors = false;
+}
+
+TimerId EventLoop::runAt(const Timestamp& time, const TimerCallback& cb) {
+    return _timerQueue->addTimer(cb, time, 0.0);
+}
+
+TimerId EventLoop::runAfter(double delay, const TimerCallback& cb)
+{
+    Timestamp time(addTime(Timestamp::now(), delay));
+    return runAt(time, cb);
+}
+
+TimerId EventLoop::runEvery(double interval, const TimerCallback& cb)
+{
+    Timestamp time(addTime(Timestamp::now(), interval));
+    return _timerQueue->addTimer(cb, time, interval);
 }
 } // namespace rpc
 } // namespace checkking
