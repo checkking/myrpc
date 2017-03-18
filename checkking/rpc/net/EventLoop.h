@@ -14,7 +14,8 @@ namespace checkking {
 namespace rpc {
 
 class Channel;
-class Poller;
+// class Poller;
+class EPoller;
 class TimerQueue;
 
 class EventLoop : boost::noncopyable {
@@ -66,7 +67,7 @@ private:
     bool _looping;
     const pid_t _threadId;
     bool _quit;
-    boost::scoped_ptr<Poller> _poller;
+    boost::scoped_ptr<EPoller> _poller;
     ChannelList _activeChannels;
     MutexLock _mutex;
     std::vector<Functor> _pendingFunctors;

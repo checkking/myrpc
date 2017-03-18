@@ -5,7 +5,8 @@
 #include <signal.h>
 #include <sys/eventfd.h>
 #include "Logging.h"
-#include "Poller.h"
+// #include "Poller.h"
+#include "EPoller.h"
 #include "Channel.h"
 #include "TimerQueue.h"
 
@@ -38,7 +39,7 @@ EventLoop::EventLoop()
     :_looping(false),
     _threadId(CurrentThread::tid()),
     _quit(false),
-    _poller(new Poller(this)),
+    _poller(new EPoller(this)),
     _activeChannels(),
     _mutex(),
     _pendingFunctors(),

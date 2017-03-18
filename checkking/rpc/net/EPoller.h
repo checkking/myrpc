@@ -24,7 +24,7 @@ public:
     void removeChannel(Channel* channel);
 
     void assertInLoopThread() {
-        _ownerLopp->assertInLoopThread();
+        _ownerLoop->assertInLoopThread();
     }
 
 private:
