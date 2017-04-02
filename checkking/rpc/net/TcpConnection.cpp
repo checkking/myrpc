@@ -118,6 +118,21 @@ namespace rpc {
         }
     }
 
+    void TcpConnection::send(Buffer* message) {
+        if (_state == CONNECTED) {
+            if (_loop->isInLoopThread()) {
+                sendInLoop(buf->peek(), buf->readableBytes());
+                buf->retrieveAll();
+            } else {
+                _loop->runInLoop(
+                        boost::bind(&TcpConnection::sendInLoop,
+                            this,
+                            buf->retrieveAllAsString()));
+            }
+        }
+    
+    }
+
     void TcpConnection::sendInLoop(const std::string& message) {
         _loop->assertInLoopThread();
         ssize_t nwrote = 0;

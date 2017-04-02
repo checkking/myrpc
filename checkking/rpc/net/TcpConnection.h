@@ -59,9 +59,19 @@ public:
 
     void send(const std::string& message);
 
+    void send(Buffer* message);
+
     void shutdown();
 
     void setTcpNoDelay(bool on);
+
+    Buffer* inputBuffer() {
+        return &_inputBuffer;
+    }
+
+    Buffer* outputBuffer() {
+        return &_outputBuffer;
+    }
 
 private:
     enum StateE {
