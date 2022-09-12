@@ -3,6 +3,7 @@
 
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/implicit_cast.hpp>
 #include "Buffer.h"
 #include "Timestamp.h"
 
@@ -18,7 +19,7 @@ typedef boost::function<void()> TimerCallback;
 template<typename To, typename From>
 inline ::boost::shared_ptr<To> down_pointer_cast(const ::boost::shared_ptr<From>& f) {
     if (false) {
-        implicit_cast<From*, To*>(0);
+        boost::implicit_cast<From*, To*>(0);
     }
 
 #ifndef NDEBUG
