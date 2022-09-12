@@ -3,12 +3,13 @@ RPC_BASE = $(WORKROOT)/base/
 
 LIB_SRC = $(wildcard *.cpp)
 INCLUDE_PATH = -I$(RPC_BASE)/output/include/ \
+                           -I/usr/include/boost/ \
 			   -I./
 LIB_PATH = -L$(RPC_BASE)/output/lib -lrpc_base \
 		   -lpthread \
 		   -lrt
 
-CC = g++
+CC = g++ -std=c++0x
 CPPFLAGS = -Wall -g $(INCLUDE_PATH) \
 		   -W \
 		   -Wno-unused
