@@ -132,7 +132,7 @@ namespace rpc {
         }
     
     }
-
+/*
     void TcpConnection::sendInLoop(const std::string& message) {
         _loop->assertInLoopThread();
         ssize_t nwrote = 0;
@@ -157,6 +157,7 @@ namespace rpc {
             _channel->enableWriting();
         }
     }
+ */
 
     void TcpConnection::shutdown() {
         if (_state == CONNECTED) {
