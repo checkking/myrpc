@@ -1,5 +1,8 @@
 #ifndef CHECKKING_RPC_BASE_ATOMIC_H
 #define CHECKKING_RPC_BASE_ATOMIC_H
+
+#include <cstdint>
+
 namespace checkking {
 namespace rpc {
 template<typename T>
